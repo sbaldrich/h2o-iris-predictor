@@ -1,0 +1,73 @@
+buildscript {
+	ext {
+		springBootVersion = '1.4.1.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+jar {
+	baseName = 'h2o-iris-predictor'
+	version = '0.0.1-SNAPSHOT'
+}
+
+repositories {
+	flatDir {dirs "lib"}
+	mavenCentral()
+}
+
+
+dependencies {
+
+    compile name: 'h2o-genmodel'
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+	compile 'org.springframework.boot:spring-boot-starter-data-rest'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+	compile 'org.projectlombok:lombok:1.16.10'
+
+	runtime 'com.h2database:h2'
+
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
+
+task deleteTmp(type: Delete) {
+    delete "tmp"
+}
+
+task runRScript(type: Exec, dependsOn: deleteTmp) {
+    commandLine "R", "-f", "predictor.R"
+}
+
+task placeGenModelJar(type: Copy, dependsOn: runRScript) {
+    from "tmp/h2o-genmodel.jar"
+    into "lib"
+}
+
+task(placeIrisModel, dependsOn: placeGenModelJar) << {
+    String fileContents = new File("tmp/IrisPredictor.java").text
+    File outd = new File("src/main/java/com/baldrichcorp/ml/generated/")
+    outd.mkdirs()
+    File outf = new File (outd, "IrisPredictor.java")
+    outf.write("package com.baldrichcorp.ml.generated;\n" + "\n" + fileContents)
+}
+
+task(generateModels, dependsOn: [placeIrisModel]) << {
+}
+
+compileJava.dependsOn generateModels
+
+task cleanGenerated(type: Delete) {
+    delete "tmp",
+            "lib/h2o-genmodel.jar",
+            "src/main/java/com/baldrichcorp/ml/generated/IrisPredictor.java"
+}
+
+clean.dependsOn cleanGenerated
