@@ -1,8 +1,9 @@
 package com.baldrichcorp.ml.service;
 
-import com.baldrichcorp.ml.PredictionRepository;
+import com.baldrichcorp.ml.repository.PredictionRepository;
 import com.baldrichcorp.ml.domain.Flower;
 import com.baldrichcorp.ml.domain.Prediction;
+import com.baldrichcorp.ml.web.PredictionRequest;
 import com.baldrichcorp.ml.web.PredictionResponse;
 import hex.genmodel.easy.EasyPredictModelWrapper;
 import hex.genmodel.easy.exception.PredictException;
@@ -16,21 +17,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class PredictionService {
 
-    private EasyPredictModelWrapper predictor;
+    private ModelSelectionService modelSelectionService;
     private FeatureService featureService;
     private PredictionRepository predictionRepository;
 
 
     @Autowired
-    public PredictionService(EasyPredictModelWrapper predictor, PredictionRepository predictionRepository, FeatureService featureService) {
-        this.predictor = predictor;
+    public PredictionService(ModelSelectionService modelSelectionService, PredictionRepository predictionRepository, FeatureService featureService) {
+        this.modelSelectionService = modelSelectionService;
         this.predictionRepository = predictionRepository;
         this.featureService = featureService;
     }
 
-    public PredictionResponse predict(Flower flower) {
+    public PredictionResponse predict(PredictionRequest request) {
         MultinomialModelPrediction multinomialPrediction;
         Prediction prediction;
+        Flower flower = request.getFlower();
+        EasyPredictModelWrapper predictor = modelSelectionService.obtainModel(request.getModelId());
         try {
             multinomialPrediction = predictor.predictMultinomial(featureService.extractFeatures(flower));
             prediction = Prediction.builder()

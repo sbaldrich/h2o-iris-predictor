@@ -13,6 +13,9 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'application'
+
+mainClassName = "com.baldrichcorp.ml.H2oIrisPredictorApplication"
 
 jar {
 	baseName = 'h2o-iris-predictor'
@@ -23,7 +26,6 @@ repositories {
 	flatDir {dirs "lib"}
 	mavenCentral()
 }
-
 
 dependencies {
 
@@ -39,27 +41,27 @@ dependencies {
 }
 
 task deleteTmp(type: Delete) {
-    delete "tmp"
+    delete "tmp/"
 }
 
-task runRScript(type: Exec, dependsOn: deleteTmp) {
-    commandLine "R", "-f", "predictor.R"
+task trainModels(type: Exec, dependsOn: deleteTmp) {
+    commandLine "sh", "train_models.sh"
 }
 
-task placeGenModelJar(type: Copy, dependsOn: runRScript) {
+task placeGenModelJar(type: Copy, dependsOn: trainModels) {
     from "tmp/h2o-genmodel.jar"
     into "lib"
 }
 
-task(placeIrisModel, dependsOn: placeGenModelJar) << {
-    String fileContents = new File("tmp/IrisPredictor.java").text
-    File outd = new File("src/main/java/com/baldrichcorp/ml/generated/")
-    outd.mkdirs()
-    File outf = new File (outd, "IrisPredictor.java")
-    outf.write("package com.baldrichcorp.ml.generated;\n" + "\n" + fileContents)
+task placePredictionModels(type: Copy, dependsOn: placeGenModelJar){
+    from("tmp/"){
+		include "*.jar"
+    }
+	into "src/main/resources"
+	exclude "h2o-genmodel.jar"
 }
 
-task(generateModels, dependsOn: [placeIrisModel]) << {
+task(generateModels, dependsOn: placePredictionModels) << {
 }
 
 compileJava.dependsOn generateModels
@@ -67,7 +69,8 @@ compileJava.dependsOn generateModels
 task cleanGenerated(type: Delete) {
     delete "tmp",
             "lib/h2o-genmodel.jar",
-            "src/main/java/com/baldrichcorp/ml/generated/IrisPredictor.java"
+            "src/main/resources/GBMIrisPredictor.jar",
+			"src/main/resources/RFIrisPredictor.jar"
 }
 
 clean.dependsOn cleanGenerated

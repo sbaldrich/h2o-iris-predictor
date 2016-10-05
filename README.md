@@ -1,13 +1,15 @@
 ## Iris Predictor
 
 A quick and dirty implementation of a Boot-based web service that uses H2O to make predictions using the [Iris data set](https://en.wikipedia.org/wiki/Iris_flower_data_set).
-The H2O Random Forest is trained using a simple R script (`predictor.R`); so yeah, you need to have `R` installed and on
-your PATH to get this project running.
+
+To support loading new prediction models without redeploying, the H2O models are compiled separately and stored in the database as jar files; then, they can be loaded at runtime.
+ To illustrate this, a helper script trains both a Random Forest and a GBM using the iris data set and stores them in the database on application startup.
+
+Have a look at the code to see how new (computed) features can be added easily.
 
 ## Build
-Run `gradle build` to run the R script that creates the Random Forest classifier and sets it up inside the `src` folder.
-All this is accomplished using custom gradle tasks. Look at the `build.gradle` file to see how this is accomplished.
-
+Run `gradle build` to run the script that creates the classifiers and sets the jar files inside the `resources` folder.
+The build file takes care of placing the generated models using custom `gradle` tasks.
 
 ## Usage
 Run `gradle bootRun` to start the embedded Tomcat server. `POST` JSON requests to get predictions that can be queried using

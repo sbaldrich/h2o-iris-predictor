@@ -1,4 +1,4 @@
-package com.baldrichcorp.ml;
+package com.baldrichcorp.ml.repository;
 
 import com.baldrichcorp.ml.domain.Prediction;
 import org.springframework.data.repository.CrudRepository;
