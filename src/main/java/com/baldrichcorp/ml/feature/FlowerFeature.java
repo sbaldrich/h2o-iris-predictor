@@ -10,9 +10,9 @@ import java.util.Map;
 public enum FlowerFeature {
 
     PETAL_WIDTH("petal_wid", SimpleExtractor.class, FlowerAttribute.PETAL_WIDTH),
-    PETAL_LENGHT("petal_len", SimpleExtractor.class, FlowerAttribute.PETAL_LENGTH),
+    PETAL_LENGTH("petal_len", SimpleExtractor.class, FlowerAttribute.PETAL_LENGTH),
     SEPAL_WIDTH("sepal_wid", SimpleExtractor.class, FlowerAttribute.SEPAL_WIDTH),
-    SEPAL_LENGHT("sepal_len", SimpleExtractor.class, FlowerAttribute.SEPAL_LENGHT),
+    SEPAL_LENGTH("sepal_len", SimpleExtractor.class, FlowerAttribute.SEPAL_LENGHT),
     LENGTH_SUMS("length_sum", SumExtractor.class);
 
     private FeatureExtractor extractor;

@@ -5,13 +5,16 @@ import com.baldrichcorp.ml.repository.PredictorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
+@EnableCaching
 @SpringBootApplication
 public class H2oIrisPredictorApplication {
 
@@ -31,11 +34,11 @@ public class H2oIrisPredictorApplication {
             try {
                 System.out.println("Saving Random Forest predictor");
                 byte[] data = FileCopyUtils.copyToByteArray(rfis);
-                Predictor predictor = new Predictor("com.baldrichcorp.ml.generated.RFIrisPredictor", "RFIrisPredictor", data);
+                Predictor predictor = new Predictor("com.baldrichcorp.ml.generated.RFIrisPredictor", "RFIrisPredictor", data, Arrays.asList("sepal_width","sepal_length"));
                 repository.save(predictor);
-                System.out.println("Saving Random Forest predictor");
+                System.out.println("Saving Gradient Boosting predictor");
                 data = FileCopyUtils.copyToByteArray(gbmis);
-                predictor = new Predictor("com.baldrichcorp.ml.generated.GBMIrisPredictor", "GBMIrisPredictor", data);
+                predictor = new Predictor("com.baldrichcorp.ml.generated.GBMIrisPredictor", "GBMIrisPredictor", data, Arrays.asList("sepal_length"));
                 repository.save(predictor);
             } catch (IOException ex) {
                 System.err.println("Sorry :(");

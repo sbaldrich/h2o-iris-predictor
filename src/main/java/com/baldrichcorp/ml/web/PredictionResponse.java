@@ -14,11 +14,13 @@ public class PredictionResponse implements Serializable {
     private String label;
     private double probability;
     private Status status;
+    private String message;
 
     public PredictionResponse(Prediction prediction) {
         this.status = prediction.isSuccessful() ? Status.SUCCESS : Status.FAILURE;
-        this.label = prediction.getPredictedLabel();
+        this.label = prediction.isSuccessful() ? prediction.getPredictedLabel() : "";
         this.probability = prediction.getProbability();
+        this.message = prediction.getMessage() == null ? "" : prediction.getMessage();
     }
 
     private static enum Status {

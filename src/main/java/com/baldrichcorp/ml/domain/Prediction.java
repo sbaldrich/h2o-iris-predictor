@@ -28,6 +28,7 @@ public class Prediction {
     private String predictedLabel;
     private double probability;
     private boolean successful;
+    private String message;
 
     @Tolerate
     private Prediction() {}
